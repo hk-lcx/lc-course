@@ -1,0 +1,13 @@
+services:
+  app:
+    build: .
+    image: personal-chief:latest
+    container_name: personal-chief
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "8001:8001"
+    volumes:
+      # SQLite checkpointer 持久化；容器重建不丢会话
+      - ./db:/app/db

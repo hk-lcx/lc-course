@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.py[cod]
+.env
+db/
+notebooks/
+.ipynb_checkpoints/
+.idea/
+.langgraph_api/
+.git/
+requirements.txt
+*.md

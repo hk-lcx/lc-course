@@ -1,0 +1,33 @@
+# 密钥与私有配置 —— 绝对不要提交
+.env
+服务器命令.txt
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# 数据库（会话记录 + 账号）
+db/*.db
+db/*.db-wal
+db/*.db-shm
+
+# IDE / 系统
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# LangGraph CLI 本地状态
+.langgraph_api/
+
+# 笔记本运行产物
+.ipynb_checkpoints/
+notebooks/resources/*.db
+notebooks/resources/*.db-wal
+notebooks/resources/*.db-shm
+
+# 日志
+*.log
+logs/

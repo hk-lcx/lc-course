@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>登录 · AI 私人厨师</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      color: #3f2d1e;
+      background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 45%, #fee2e2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      width: 100%;
+      max-width: 400px;
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      border-radius: 24px;
+      box-shadow: 0 20px 50px rgba(194, 65, 12, 0.15);
+      padding: 32px 28px;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+    .logo {
+      width: 44px; height: 44px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #f97316, #dc2626);
+      color: #fff; font-size: 22px;
+    }
+    h1 { font-size: 20px; margin: 0; }
+    .subtitle { color: #9a8f84; font-size: 13px; margin: 2px 0 0; }
+    .tabs {
+      display: flex; background: #f5f0eb; border-radius: 14px;
+      padding: 4px; margin: 22px 0 20px;
+    }
+    .tab {
+      flex: 1; border: 0; background: transparent; padding: 9px 0;
+      border-radius: 10px; font-size: 14px; cursor: pointer;
+      color: #8a7a6b; font-weight: 600; transition: all .18s ease;
+    }
+    .tab.active { background: #fff; color: #ea580c; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    label { display: block; font-size: 13px; font-weight: 600; color: #6b5b4d; margin: 14px 0 6px; }
+    input {
+      width: 100%; padding: 11px 14px; font-size: 14px;
+      border: 1px solid #e7ded4; border-radius: 12px; background: #fff;
+      outline: none; transition: border-color .15s, box-shadow .15s;
+    }
+    input:focus { border-color: #fb923c; box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.2); }
+    .hint { font-size: 12px; color: #a99c8f; margin-top: 6px; }
+    .error {
+      display: none; margin-top: 14px; padding: 10px 12px;
+      background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c;
+      border-radius: 10px; font-size: 13px; line-height: 1.5;
+    }
+    .error.show { display: block; }
+    .submit {
+      width: 100%; margin-top: 20px; padding: 12px; border: 0; cursor: pointer;
+      border-radius: 12px; color: #fff; font-size: 15px; font-weight: 600;
+      background: linear-gradient(135deg, #f97316, #dc2626);
+      box-shadow: 0 8px 20px rgba(234, 88, 12, 0.25);
+      transition: opacity .15s;
+    }
+    .submit:disabled { opacity: .6; cursor: not-allowed; }
+    .switch { text-align: center; font-size: 13px; color: #8a7a6b; margin-top: 16px; }
+    .switch a { color: #ea580c; text-decoration: none; font-weight: 600; }
+    .panel { display: none; text-align: center; }
+    .panel.show { display: block; }
+    .avatar {
+      width: 56px; height: 56px; border-radius: 50%; margin: 4px auto 14px;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #f97316, #dc2626);
+      color: #fff; font-size: 24px; font-weight: 700;
+    }
+    .panel-name { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+    .panel-desc { font-size: 13px; color: #9a8f84; margin-bottom: 22px; }
+    .row { display: flex; gap: 10px; }
+    .ghost {
+      flex: 1; padding: 11px; border-radius: 12px; cursor: pointer;
+      font-size: 14px; font-weight: 600; border: 1px solid #e7ded4;
+      background: #fff; color: #6b5b4d;
+    }
+    .primary {
+      flex: 1; padding: 11px; border-radius: 12px; cursor: pointer;
+      font-size: 14px; font-weight: 600; border: 0; color: #fff;
+      background: linear-gradient(135deg, #f97316, #dc2626);
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="brand">
+      <div class="logo">🍳</div>
+      <div>
+        <h1>AI 私人厨师</h1>
+        <p class="subtitle">登录后上传食材，获取专属食谱</p>
+      </div>
+    </div>
+
+    <div class="panel" id="panel">
+      <div class="avatar" id="avatar">我</div>
+      <div class="panel-name" id="panel-name"></div>
+      <div class="panel-desc">你已登录</div>
+      <div class="row">
+        <button class="ghost" id="logout-btn" type="button">退出当前账号</button>
+        <button class="primary" id="enter-btn" type="button">进入应用</button>
+      </div>
+    </div>
+
+    <div id="form-area">
+      <div class="tabs">
+        <button class="tab active" id="tab-login" type="button">登录</button>
+        <button class="tab" id="tab-register" type="button">注册</button>
+      </div>
+
+      <form id="auth-form" autocomplete="on">
+        <label for="username">账号</label>
+        <input id="username" name="username" type="text" maxlength="32"
+               placeholder="3-32 个字符" autocomplete="username" required />
+
+        <label for="password">密码</label>
+        <input id="password" name="password" type="password" maxlength="128"
+               placeholder="至少 6 个字符" autocomplete="current-password" required />
+
+        <div id="confirm-wrap" style="display:none">
+          <label for="confirm">确认密码</label>
+          <input id="confirm" name="confirm" type="password" maxlength="128"
+                 placeholder="再次输入密码" autocomplete="new-password" />
+        </div>
+
+        <div class="hint" id="mode-hint">还没有账号？点击上方「注册」创建一个。</div>
+        <div class="error" id="error"></div>
+        <button class="submit" id="submit-btn" type="submit">登录</button>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    (function () {
+      var TOKEN_KEY = 'auth_token';
+      var USER_KEY = 'auth_user';
+      var API = '/api/v1/auth';
+
+      var mode = 'login';
+      var form = document.getElementById('auth-form');
+      var username = document.getElementById('username');
+      var password = document.getElementById('password');
+      var confirmInput = document.getElementById('confirm');
+      var confirmWrap = document.getElementById('confirm-wrap');
+      var errorBox = document.getElementById('error');
+      var submitBtn = document.getElementById('submit-btn');
+      var tabLogin = document.getElementById('tab-login');
+      var tabRegister = document.getElementById('tab-register');
+      var modeHint = document.getElementById('mode-hint');
+      var panel = document.getElementById('panel');
+      var formArea = document.getElementById('form-area');
+
+      function showError(message) {
+        errorBox.textContent = message;
+        errorBox.classList.add('show');
+      }
+
+      function clearError() {
+        errorBox.textContent = '';
+        errorBox.classList.remove('show');
+      }
+
+      function formatDetail(data) {
+        if (!data) return '请求失败，请稍后重试';
+        if (typeof data.detail === 'string') return data.detail;
+        if (Array.isArray(data.detail) && data.detail.length) {
+          return data.detail.map(function (item) { return item.msg || ''; }).join('；');
+        }
+        return '请求失败，请稍后重试';
+      }
+
+      function setMode(next) {
+        mode = next;
+        var isLogin = next === 'login';
+        tabLogin.classList.toggle('active', isLogin);
+        tabRegister.classList.toggle('active', !isLogin);
+        confirmWrap.style.display = isLogin ? 'none' : 'block';
+        confirmInput.required = !isLogin;
+        password.autocomplete = isLogin ? 'current-password' : 'new-password';
+        submitBtn.textContent = isLogin ? '登录' : '注册';
+        modeHint.textContent = isLogin
+          ? '还没有账号？点击上方「注册」创建一个。'
+          : '注册成功后会自动登录。';
+        clearError();
+      }
+
+      tabLogin.addEventListener('click', function () { setMode('login'); });
+      tabRegister.addEventListener('click', function () { setMode('register'); });
+
+      function storeSession(data) {
+        localStorage.setItem(TOKEN_KEY, data.access_token);
+        localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+        // 每次登录成功后都要先选择菜系
+        localStorage.setItem('cuisine_pending', '1');
+      }
+
+      function clearSession() {
+        localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem(USER_KEY);
+        localStorage.removeItem('cuisine');
+        localStorage.removeItem('cuisine_pending');
+      }
+
+      function nextUrl() {
+        var params = new URLSearchParams(location.search);
+        var next = params.get('next');
+        if (next && next.charAt(0) === '/' && next.indexOf('//') !== 0 && next.indexOf('login.html') === -1) {
+          return next;
+        }
+        return '/';
+      }
+
+      function showPanel(user) {
+        panel.classList.add('show');
+        formArea.style.display = 'none';
+        document.getElementById('panel-name').textContent = user.username;
+        document.getElementById('avatar').textContent = user.username.charAt(0).toUpperCase();
+      }
+
+      var enterBtn = document.getElementById('enter-btn');
+      var logoutBtn = document.getElementById('logout-btn');
+      enterBtn.addEventListener('click', function () { location.href = nextUrl(); });
+      logoutBtn.addEventListener('click', function () {
+        var token = localStorage.getItem(TOKEN_KEY);
+        var done = function () {
+          clearSession();
+          panel.classList.remove('show');
+          formArea.style.display = 'block';
+          setMode('login');
+        };
+        if (!token) {
+          done();
+          return;
+        }
+        // 通知服务端作废 token；网络失败也照样清本地
+        fetch(API + '/logout', {
+          method: 'POST',
+          headers: { Authorization: 'Bearer ' + token }
+        }).catch(function () { /* ignore */ }).then(done);
+      });
+
+      // 已登录则校验 token；有效就展示账号面板
+      var existingToken = localStorage.getItem(TOKEN_KEY);
+      if (existingToken) {
+        fetch(API + '/me', { headers: { Authorization: 'Bearer ' + existingToken } })
+          .then(function (res) {
+            if (!res.ok) throw new Error('invalid');
+            return res.json();
+          })
+          .then(function (user) {
+            localStorage.setItem(USER_KEY, JSON.stringify(user));
+            showPanel(user);
+          })
+          .catch(function () {
+            clearSession();
+          });
+      }
+
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        clearError();
+
+        var account = username.value.trim();
+        if (account.length < 3) {
+          showError('账号至少 3 个字符');
+          return;
+        }
+        if (password.value.length < 6) {
+          showError('密码至少 6 个字符');
+          return;
+        }
+        if (mode === 'register' && password.value !== confirmInput.value) {
+          showError('两次输入的密码不一致');
+          return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = mode === 'login' ? '登录中…' : '注册中…';
+
+        fetch(API + (mode === 'login' ? '/login' : '/register'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: account, password: password.value })
+        })
+          .then(function (res) {
+            return res.json().catch(function () { return {}; }).then(function (data) {
+              if (!res.ok) throw new Error(formatDetail(data));
+              return data;
+            });
+          })
+          .then(function (data) {
+            storeSession(data);
+            location.href = nextUrl();
+          })
+          .catch(function (err) {
+            showError(err && err.message ? err.message : '网络异常，请稍后重试');
+          })
+          .finally(function () {
+            submitBtn.disabled = false;
+            submitBtn.textContent = mode === 'login' ? '登录' : '注册';
+          });
+      });
+
+      setMode('login');
+    })();
+  </script>
+</body>
+</html>
